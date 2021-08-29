@@ -53,6 +53,33 @@ class ItemController extends AbstractController
     }
 
     /**
+     * @Route("/item", name="item_update", methods={"PUT"})
+     * @IsGranted("ROLE_USER")
+     */
+    public function update(Request $request, ItemService $itemService)
+    {
+        $id = $request->get('id');
+        $data = $request->get('data');
+
+        if (empty($id)) {
+            return $this->json(['error' => 'No id parameter'], Response::HTTP_BAD_REQUEST);
+        }
+
+        if (empty($data)) {
+            return $this->json(['error' => 'No data parameter'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $item = $this->getDoctrine()->getRepository(Item::class)->find($id);
+
+        if ($item === null) {
+            return $this->json(['error' => 'Item not found'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $itemService->update($item, $data);
+        return $this->json([]);
+    }
+
+    /**
      * @Route("/item/{id}", name="items_delete", methods={"DELETE"})
      * @IsGranted("ROLE_USER")
      */
@@ -65,7 +92,7 @@ class ItemController extends AbstractController
         $item = $this->getDoctrine()->getRepository(Item::class)->find($id);
 
         if ($item === null) {
-            return $this->json(['error' => 'No item'], Response::HTTP_BAD_REQUEST);
+            return $this->json(['error' => 'Item not found'], Response::HTTP_BAD_REQUEST);
         }
 
         $manager = $this->getDoctrine()->getManager();
